@@ -30,10 +30,13 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    // Log in to Docker Hub (or AWS ECR if using ECR)
-                    sh 'docker login -u $DOCKER_USER -p $DOCKER_PASS'
-                    // Push the image to Docker Hub (or AWS ECR)
-                    sh 'docker push $DOCKER_IMAGE'
+                    // Log in to Docker Hub using Jenkins credentials
+                    withCredentials([usernamePassword(credentialsId: "DOCKER_CREDENTIALS", passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
+                        // Perform login using the credentials
+                        sh 'docker login -u $DOCKER_USER -p $DOCKER_PASS'
+                        // Push the image after login
+                        sh 'docker push $DOCKER_IMAGE'
+                    }
                 }
             }
         }
@@ -47,4 +50,3 @@ pipeline {
         }
     }
 }
-
